@@ -59,7 +59,7 @@ if ['check-for-update'].include?(ARGV[0])
   puts colorize_lightblue("This is a universal dev env (version #{this_version})")
   # Skip version check if not on master (prevents infinite loops if you're in a branch that isn't up to date with the
   # latest release code yet)
-  current_branch = `git -C #{root_loc} rev-parse --abbrev-ref HEAD`.strip
+  current_branch = `git rev-parse --abbrev-ref HEAD`.strip
   if current_branch == 'master'
     self_update(root_loc, this_version)
   else
@@ -110,7 +110,7 @@ if ['prep'].include?(ARGV[0])
   puts colorize_lightblue('Retrieving custom configuration repo files:')
   if Dir.exist?(DEV_ENV_CONFIG_DIR)
     new_project = false
-    command_successful = run_command("git -C #{root_loc}/dev-env-config pull")
+    command_successful = run_command("cd #{root_loc}/dev-env-config && git pull")
   else
     new_project = true
     config_repo = File.read(DEV_ENV_CONTEXT_FILE)
@@ -120,7 +120,7 @@ if ['prep'].include?(ARGV[0])
     command_successful = run_command("git clone #{parsed_repo} #{root_loc}/dev-env-config")
     if command_successful.zero? && !delimiter.empty?
       puts colorize_lightblue("Checking out configuration repo ref: #{ref}")
-      command_successful = run_command("git -C #{root_loc}/dev-env-config checkout #{ref}")
+      command_successful = run_command("cd #{root_loc}/dev-env-config && git checkout #{ref}")
     end
   end
 

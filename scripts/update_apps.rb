@@ -70,7 +70,7 @@ end
 
 def current_branch(root_loc, appname)
   # What branch are we working on?
-  current_branch = `git -C #{root_loc}/apps/#{appname} rev-parse --abbrev-ref HEAD`.strip
+  current_branch = `cd #{root_loc}/apps/#{appname} && git rev-parse --abbrev-ref HEAD`.strip
   # Check for a detached head scenario (i.e. a specific commit) - technically there is therefore no branch
   current_branch = 'detached' if current_branch.eql? 'HEAD'
   current_branch
@@ -80,7 +80,7 @@ def merge(root_loc, appname, required_branch)
   return [] if current_branch(root_loc, appname) == 'detached'
 
   output_lines = [colorize_lightblue("Bringing #{required_branch} up to date")]
-  if run_command("git -C #{root_loc}/apps/#{appname} merge --ff-only", output_lines) != 0
+  if run_command("cd #{root_loc}/apps/#{appname} && git merge --ff-only", output_lines) != 0
     output_lines << colorize_yellow("The local branch couldn't be fast forwarded (a merge is probably " \
                                     "required), so to be safe I didn't update anything")
   end
@@ -111,7 +111,7 @@ def update_app(appconfig, root_loc, appname)
 
   # Update all the remote branches (this will not change the local branch, we'll do that further down')
   output_lines << colorize_lightblue('Fetching from remote...')
-  return output_lines unless run_command('git -C ' + "#{root_loc}/apps/#{appname} fetch origin", output_lines) != 0
+  return output_lines unless run_command('cd #{root_loc}/apps/#{appname} && git fetch origin', output_lines) != 0
 
   # If there is a git error we shouldn't continue
   output_lines << colorize_red("Error while updating #{appname}")
@@ -137,7 +137,7 @@ def clone_app(appconfig, root_loc, appname)
   required_reference = required_ref(appconfig)
   if !current_branch.eql? required_reference
     output_lines << colorize_lightblue("Switching to #{required_reference}")
-    run_command("git -C #{root_loc}/apps/#{appname} checkout #{required_reference}", output_lines)
+    run_command("cd #{root_loc}/apps/#{appname} && git checkout #{required_reference}", output_lines)
   else
     output_lines << colorize_lightblue("Current branch is already #{current_branch}")
   end
